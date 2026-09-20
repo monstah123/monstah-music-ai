@@ -17,7 +17,7 @@ export default function Sidebar() {
         <Link href="/" className="logo-link">
           <div className="logo-icon">⚡</div>
           <div className="logo-text">
-            <span>MONSTAH</span>
+            <span>MONSTAH!!!</span>
             <span className="logo-sub">MUSIC AI</span>
           </div>
         </Link>

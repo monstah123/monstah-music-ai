@@ -89,7 +89,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        <title>Monstah Music — AI Music Generator</title>
+        <title>MONSTAH!!! Music — AI Music Generator</title>
         <meta name="description" content="Generate original songs, lyrics, and full backing tracks with Stability AI Stable Audio. Professional quality AI music in seconds." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />

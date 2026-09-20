@@ -15,8 +15,8 @@ export async function POST(request) {
       const words = prompt.split(' ');
       const title = words.slice(0, 4).join(' ').toUpperCase();
       return NextResponse.json({
-        title: title || 'MONSTAH ANTHEM',
-        lyrics: `[Verse 1]\nEchoes in the dark, lighting up the sky\nWe are building dreams that will never die\nEvery single heartbeatSyncing with the sound\nFeel the heavy rhythm taking over now\n\n[Chorus]\n${title || 'MONSTAH ANTHEM'} — feel the electric charge\nLiving out loud, living life extra large\nFrom the highest peak to the deepest beat\nMusic generated right here on the street\n\n[Verse 2]\nFrequencies align, neural pathways bright\nCreating original magic through the night\nNo limits now, we set the world ablaze\nLost inside the rhythm of a thousand days\n\n[Outro]\n${title || 'MONSTAH ANTHEM'}... fade out.`,
+        title: title || 'MONSTAH!!! ANTHEM',
+        lyrics: `[Verse 1]\nEchoes in the dark, lighting up the sky\nWe are building dreams that will never die\nEvery single heartbeatSyncing with the sound\nFeel the heavy rhythm taking over now\n\n[Chorus]\n${title || 'MONSTAH!!! ANTHEM'} — feel the electric charge\nLiving out loud, living life extra large\nFrom the highest peak to the deepest beat\nMusic generated right here on the street\n\n[Verse 2]\nFrequencies align, neural pathways bright\nCreating original magic through the night\nNo limits now, we set the world ablaze\nLost inside the rhythm of a thousand days\n\n[Outro]\n${title || 'MONSTAH!!! ANTHEM'}... fade out.`,
         genre,
         mood: 'energetic',
         bpm_suggestion: '128',
@@ -32,8 +32,8 @@ export async function POST(request) {
       const words = prompt.split(' ');
       const title = words.slice(0, 4).join(' ').toUpperCase();
       return NextResponse.json({
-        title: title || 'MONSTAH ANTHEM',
-        lyrics: `[Verse 1]\nEchoes in the dark, lighting up the sky\nWe are building dreams that will never die\nEvery single heartbeatSyncing with the sound\nFeel the heavy rhythm taking over now\n\n[Chorus]\n${title || 'MONSTAH ANTHEM'} — feel the electric charge\nLiving out loud, living life extra large\nFrom the highest peak to the deepest beat\nMusic generated right here on the street\n\n[Verse 2]\nFrequencies align, neural pathways bright\nCreating original magic through the night\nNo limits now, we set the world ablaze\nLost inside the rhythm of a thousand days\n\n[Outro]\n${title || 'MONSTAH ANTHEM'}... fade out.`,
+        title: title || 'MONSTAH!!! ANTHEM',
+        lyrics: `[Verse 1]\nEchoes in the dark, lighting up the sky\nWe are building dreams that will never die\nEvery single heartbeatSyncing with the sound\nFeel the heavy rhythm taking over now\n\n[Chorus]\n${title || 'MONSTAH!!! ANTHEM'} — feel the electric charge\nLiving out loud, living life extra large\nFrom the highest peak to the deepest beat\nMusic generated right here on the street\n\n[Verse 2]\nFrequencies align, neural pathways bright\nCreating original magic through the night\nNo limits now, we set the world ablaze\nLost inside the rhythm of a thousand days\n\n[Outro]\n${title || 'MONSTAH!!! ANTHEM'}... fade out.`,
         genre,
         mood: 'energetic',
         bpm_suggestion: '128',

@@ -37,7 +37,7 @@ export default function Home() {
             Make any song you can <span className="gradient-text">imagine</span>
           </h1>
           <p className="hero-subtitle">
-            Describe a vibe, genre, or story. Monstah Music AI instantly generates full songs, backing tracks, and lyrics in under 30 seconds.
+            Describe a vibe, genre, or story. MONSTAH!!! Music AI instantly generates full songs, backing tracks, and lyrics in under 30 seconds.
           </p>
           <div className="hero-actions">
             <Link href="/create" className="glow-button hero-btn">
