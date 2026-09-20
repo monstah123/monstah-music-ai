@@ -385,22 +385,124 @@ export default function CreatePage() {
         }
 
         @media (max-width: 768px) {
-          .create-page { padding: 16px 14px; gap: 16px; }
+          .create-page {
+            padding: 14px 12px !important;
+            gap: 14px;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            overflow-x: hidden;
+          }
           .page-title { font-size: 22px; }
+
           /* On mobile the output col (result) comes first, form second */
           .studio-grid {
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 14px;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
           }
-          .output-col { order: 1; }
-          .panel-col  { order: 2; }
+          .output-col {
+            order: 1;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            min-width: 0;
+          }
+          .panel-col {
+            order: 2;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            min-width: 0;
+          }
+
           /* Hide form on mobile after result is ready */
           .mobile-hidden { display: none !important; }
-          /* Hide desktop-only placeholder on mobile (no point showing empty state) */
+          /* Hide desktop-only placeholder on mobile */
           .desktop-placeholder { display: none !important; }
           /* Hide subtitle on mobile to save space */
           .desktop-only { display: none !important; }
+
+          /* Compact Result Card on Mobile — No Right Side Overlap */
+          .result-card {
+            padding: 16px 14px !important;
+            gap: 14px !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+            border-radius: var(--radius-md) !important;
+            overflow: hidden !important;
+          }
+
+          .song-preview-box {
+            gap: 12px !important;
+          }
+
+          .preview-artwork {
+            width: 76px !important;
+            height: 76px !important;
+            border-radius: var(--radius-sm) !important;
+          }
+
+          .play-big-btn {
+            width: 42px !important;
+            height: 42px !important;
+            font-size: 16px !important;
+          }
+
+          .preview-info h2 {
+            font-size: 16px !important;
+          }
+
+          .result-header {
+            gap: 6px !important;
+          }
+
+          .badge-new { font-size: 10px !important; }
+          .result-pills { gap: 4px !important; }
+          .vocal-pill, .demo-pill, .model-pill {
+            font-size: 10px !important;
+            padding: 2px 6px !important;
+          }
+
+          /* Grid layout for buttons on mobile so they fit 100% width cleanly */
+          .result-actions {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 8px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+          }
+
+          :global(.download-btn) {
+            grid-column: 1 / -1 !important;
+            width: 100% !important;
+            min-width: 0 !important;
+            padding: 12px !important;
+            font-size: 14px !important;
+            justify-content: center !important;
+          }
+
+          .share-btn, .detail-btn {
+            width: 100% !important;
+            min-width: 0 !important;
+            padding: 10px 6px !important;
+            font-size: 12px !important;
+            text-align: center !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            box-sizing: border-box !important;
+          }
+
+          .generated-lyrics-box {
+            padding: 12px !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+          }
         }
 
         .output-col {
@@ -482,6 +584,10 @@ export default function CreatePage() {
           flex-direction: column;
           gap: 20px;
           border-color: rgba(124, 58, 237, 0.35);
+          width: 100%;
+          max-width: 100%;
+          box-sizing: border-box;
+          overflow: hidden;
         }
 
         .result-header {
@@ -662,6 +768,8 @@ export default function CreatePage() {
           line-height: 1.7;
           color: var(--text-secondary);
           white-space: pre-wrap;
+          word-break: break-word;
+          overflow-wrap: anywhere;
         }
 
         .result-actions {
