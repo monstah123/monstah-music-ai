@@ -7,6 +7,7 @@ import { getSongById, deleteSong } from '../../../lib/songStorage';
 import { TRENDING_SONGS } from '../../../lib/mockData';
 import { usePlayer } from '../../../context/PlayerContext';
 import { toast } from '../../../components/Toast';
+import { triggerDownload } from '../../../lib/download';
 
 // Render lyrics with highlighted section headers
 function StructuredLyrics({ text }) {
@@ -210,16 +211,14 @@ export default function SongDetailPage({ params }) {
               <span>{isCurrentPlaying ? '⏸ Pause' : '▶ Play Song'}</span>
             </button>
 
-            {song.audioUrl && !song.audioUrl.startsWith('/demo-audio') && (
-              <a
-                href={song.audioUrl}
-                download={`${song.title}.mp3`}
-                target="_blank"
-                rel="noreferrer"
-                className="action-btn"
+            {song.audioUrl && (
+              <button
+                type="button"
+                className="action-btn download-btn"
+                onClick={() => triggerDownload(song.audioUrl, song.title)}
               >
-                ⬇️ Download
-              </a>
+                ⬇️ Download MP3
+              </button>
             )}
 
             <button className="action-btn" onClick={handleShareLink}>

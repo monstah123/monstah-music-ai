@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import WaveformVisualizer from './WaveformVisualizer';
 import { usePlayer } from '../context/PlayerContext';
+import { triggerDownload } from '../lib/download';
 
 // ─── Mobile Audio Unlock ───────────────────────────────────────────────────
 // iOS / Android block audio until a real user gesture fires.
@@ -261,6 +262,16 @@ export default function AudioPlayer() {
 
       {/* Actions & Volume */}
       <div className="player-right">
+        {currentSong.audioUrl && (
+          <button
+            className="action-btn"
+            onClick={() => triggerDownload(currentSong.audioUrl, currentSong.title)}
+            title="Download MP3"
+          >
+            ⬇️ MP3
+          </button>
+        )}
+
         {currentSong.lyrics && (
           <button
             className={`action-btn ${showLyricsModal ? 'active' : ''}`}

@@ -6,6 +6,7 @@ import WaveformVisualizer from '../../components/WaveformVisualizer';
 import { saveSong } from '../../lib/songStorage';
 import { usePlayer } from '../../context/PlayerContext';
 import { toast } from '../../components/Toast';
+import { triggerDownload } from '../../lib/download';
 
 export default function CreatePage() {
   const { onPlaySong, currentSong, isPlaying } = usePlayer();
@@ -244,15 +245,13 @@ export default function CreatePage() {
               )}
 
               <div className="result-actions">
-                <a
-                  href={generatedSong.audioUrl}
-                  download={`${generatedSong.title}.mp3`}
-                  target="_blank"
-                  rel="noreferrer"
+                <button
+                  type="button"
                   className="glow-button download-btn"
+                  onClick={() => triggerDownload(generatedSong.audioUrl, generatedSong.title)}
                 >
-                  <span>⬇️ Download</span>
-                </a>
+                  <span>⬇️ Download MP3</span>
+                </button>
                 <button
                   className="share-btn"
                   onClick={() => {
