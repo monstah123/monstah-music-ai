@@ -5,6 +5,7 @@ import SongCard from '../../components/SongCard';
 import { getSongs, deleteSong, clearAllUserSongs } from '../../lib/songStorage';
 import { usePlayer } from '../../context/PlayerContext';
 import { toast } from '../../components/Toast';
+import { triggerDownload } from '../../lib/download';
 
 const SORT_OPTIONS = [
   { value: 'newest', label: '🕒 Newest' },
@@ -254,14 +255,27 @@ export default function LibraryPage() {
                 }}
               />
               {!bulkMode && (
-                <button
-                  className="delete-song-btn"
-                  onClick={(e) => handleDelete(song.id, e)}
-                  title="Delete track"
-                  aria-label="Delete track"
-                >
-                  🗑️
-                </button>
+                <div className="card-top-actions">
+                  <button
+                    className="card-action-icon download-lib-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      triggerDownload(song.audioUrl, song.title);
+                    }}
+                    title="Download MP3"
+                    aria-label="Download MP3"
+                  >
+                    ⬇️
+                  </button>
+                  <button
+                    className="card-action-icon delete-song-btn"
+                    onClick={(e) => handleDelete(song.id, e)}
+                    title="Delete track"
+                    aria-label="Delete track"
+                  >
+                    🗑️
+                  </button>
+                </div>
               )}
             </div>
           ))}
@@ -581,11 +595,25 @@ export default function LibraryPage() {
 
         .select-checkbox:hover { transform: scale(1.15); }
 
-        .delete-song-btn {
+        .card-top-actions {
           position: absolute;
           top: 10px;
           right: 10px;
           z-index: 10;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          opacity: 0;
+          transition: opacity 0.2s ease;
+        }
+
+        .library-card-wrapper:hover .card-top-actions { opacity: 1; }
+
+        @media (max-width: 768px) {
+          .card-top-actions { opacity: 1 !important; }
+        }
+
+        .card-action-icon {
           width: 32px;
           height: 32px;
           border-radius: 50%;
@@ -595,15 +623,17 @@ export default function LibraryPage() {
           align-items: center;
           justify-content: center;
           font-size: 14px;
-          opacity: 0;
-          transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease;
+          transition: transform 0.2s ease, background 0.2s ease;
         }
 
-        .library-card-wrapper:hover .delete-song-btn { opacity: 1; }
+        .card-action-icon:hover { transform: scale(1.15); }
+
+        .download-lib-btn:hover {
+          background: rgba(124, 58, 237, 0.85);
+        }
 
         .delete-song-btn:hover {
-          transform: scale(1.15);
-          background: rgba(239, 68, 68, 0.75);
+          background: rgba(239, 68, 68, 0.85);
         }
 
         /* Empty */

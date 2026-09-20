@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
+import { triggerDownload } from '../lib/download';
 
 export default function SongCard({ song, isPlaying, onPlay }) {
   const [isLiked, setIsLiked] = useState(false);
@@ -38,13 +39,28 @@ export default function SongCard({ song, isPlaying, onPlay }) {
           <Link href={`/song/${song.id}`} className="card-title" onClick={(e) => e.stopPropagation()}>
             {song.title}
           </Link>
-          <button
-            className={`like-btn ${isLiked ? 'liked' : ''}`}
-            onClick={toggleLike}
-            title={isLiked ? 'Unlike' : 'Like'}
-          >
-            {isLiked ? '❤️' : '🤍'}
-          </button>
+          <div className="card-btn-group">
+            {song.audioUrl && (
+              <button
+                type="button"
+                className="card-download-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  triggerDownload(song.audioUrl, song.title);
+                }}
+                title="Download MP3"
+              >
+                ⬇️
+              </button>
+            )}
+            <button
+              className={`like-btn ${isLiked ? 'liked' : ''}`}
+              onClick={toggleLike}
+              title={isLiked ? 'Unlike' : 'Like'}
+            >
+              {isLiked ? '❤️' : '🤍'}
+            </button>
+          </div>
         </div>
 
         <p className="card-prompt">{song.prompt}</p>
@@ -170,6 +186,28 @@ export default function SongCard({ song, isPlaying, onPlay }) {
           display: flex;
           justify-content: space-between;
           align-items: center;
+          gap: 8px;
+        }
+
+        .card-btn-group {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .card-download-btn {
+          font-size: 13px;
+          padding: 4px;
+          border-radius: 50%;
+          transition: transform 0.2s ease, background 0.2s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .card-download-btn:hover {
+          transform: scale(1.2);
+          background: rgba(124, 58, 237, 0.2);
         }
 
         .card-title {
