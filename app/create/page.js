@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import CreatePanel from '../../components/CreatePanel';
 import LoadingAnimation from '../../components/LoadingAnimation';
 import WaveformVisualizer from '../../components/WaveformVisualizer';
@@ -13,6 +13,8 @@ export default function CreatePage() {
   const [statusText, setStatusText] = useState('');
   const [errorMsg, setErrorMsg] = useState(null);
   const [generatedSong, setGeneratedSong] = useState(null);
+  const [showForm, setShowForm] = useState(true);
+  const resultRef = useRef(null);
 
   const safeParseJsonResponse = async (res) => {
     const text = await res.text();
@@ -115,6 +117,15 @@ export default function CreatePage() {
       if (onPlaySong) onPlaySong(saved || songObj);
 
       toast.success(`"${songTitle}" generated successfully!`);
+
+      // On mobile: collapse form and scroll to result
+      const isMobile = window.innerWidth <= 768;
+      if (isMobile) {
+        setShowForm(false);
+        setTimeout(() => {
+          resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+      }
     } catch (err) {
       console.error('Generation Error:', err);
       setErrorMsg(err.message || 'An error occurred during generation.');
@@ -126,10 +137,26 @@ export default function CreatePage() {
 
   return (
     <div className="create-page animate-fade-in-up">
+      {/* Mobile: compact header with New Song button when result is showing */}
       <div className="page-header">
-        <div className="header-badge">⚡ Stable Audio 2.5</div>
-        <h1 className="page-title">AI Music Generation Studio</h1>
-        <p className="page-subtitle">
+        <div className="header-top-row">
+          <div>
+            <div className="header-badge">⚡ Stable Audio 2.5</div>
+            <h1 className="page-title">AI Music Studio</h1>
+          </div>
+          {generatedSong && !showForm && (
+            <button
+              className="new-song-btn"
+              onClick={() => {
+                setShowForm(true);
+                setGeneratedSong(null);
+              }}
+            >
+              ✨ New Song
+            </button>
+          )}
+        </div>
+        <p className="page-subtitle desktop-only">
           Generate up to 2 minutes of professional studio-quality music in seconds.
         </p>
       </div>
@@ -142,13 +169,10 @@ export default function CreatePage() {
       )}
 
       <div className="studio-grid">
-        {/* Creation Input Panel */}
-        <div className="panel-col">
-          <CreatePanel onGenerate={handleGenerate} isLoading={isLoading} />
-        </div>
+        {/* On mobile: result / loading shown FIRST (order-1), form shown SECOND (order-2) */}
 
         {/* Right Output Side */}
-        <div className="output-col">
+        <div className="output-col" ref={resultRef}>
           {isLoading ? (
             <LoadingAnimation statusText={statusText} />
           ) : generatedSong ? (
@@ -249,7 +273,7 @@ export default function CreatePage() {
               </div>
             </div>
           ) : (
-            <div className="placeholder-box glass-panel">
+            <div className="placeholder-box glass-panel desktop-placeholder">
               <div className="placeholder-orbs">
                 <div className="orb orb-1" />
                 <div className="orb orb-2" />
@@ -257,11 +281,16 @@ export default function CreatePage() {
               <div className="placeholder-icon">🎧</div>
               <h3>Your Generated Track Will Appear Here</h3>
               <p>
-                Pick a genre preset or describe your vibe on the left, then hit Generate.
+                Pick a genre preset or describe your vibe, then hit Generate.
                 Powered by Stability AI Stable Audio 2.5.
               </p>
             </div>
           )}
+        </div>
+
+        {/* Creation Input Panel — hidden on mobile after generation */}
+        <div className={`panel-col ${!showForm ? 'mobile-hidden' : ''}`}>
+          <CreatePanel onGenerate={handleGenerate} isLoading={isLoading} />
         </div>
       </div>
 
@@ -277,6 +306,31 @@ export default function CreatePage() {
           display: flex;
           flex-direction: column;
           gap: 6px;
+        }
+
+        .header-top-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: 12px;
+        }
+
+        .new-song-btn {
+          padding: 10px 18px;
+          border-radius: var(--radius-full);
+          background: var(--gradient-primary);
+          color: #fff;
+          font-size: 13px;
+          font-weight: 700;
+          font-family: var(--font-heading);
+          white-space: nowrap;
+          box-shadow: 0 4px 16px var(--accent-purple-glow);
+          transition: transform 0.2s ease;
+          flex-shrink: 0;
+        }
+
+        .new-song-btn:hover {
+          transform: scale(1.04);
         }
 
         .header-badge {
@@ -331,7 +385,22 @@ export default function CreatePage() {
         }
 
         @media (max-width: 768px) {
-          .create-page { padding: 20px 16px; }
+          .create-page { padding: 16px 14px; gap: 16px; }
+          .page-title { font-size: 22px; }
+          /* On mobile the output col (result) comes first, form second */
+          .studio-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+          }
+          .output-col { order: 1; }
+          .panel-col  { order: 2; }
+          /* Hide form on mobile after result is ready */
+          .mobile-hidden { display: none !important; }
+          /* Hide desktop-only placeholder on mobile (no point showing empty state) */
+          .desktop-placeholder { display: none !important; }
+          /* Hide subtitle on mobile to save space */
+          .desktop-only { display: none !important; }
         }
 
         .output-col {
