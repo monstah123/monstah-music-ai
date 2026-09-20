@@ -1,26 +1,84 @@
 'use client';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import WaveformVisualizer from './WaveformVisualizer';
 import { usePlayer } from '../context/PlayerContext';
+
+// ─── Mobile Audio Unlock ───────────────────────────────────────────────────
+// iOS / Android block audio until a real user gesture fires.
+// We silently play + immediately pause a zero-length audio to "unlock" the
+// browser's audio context on the very first tap anywhere on the page.
+let _audioUnlocked = false;
+
+function unlockAudio(audioEl) {
+  if (_audioUnlocked || !audioEl) return;
+  _audioUnlocked = true;
+  // Play and immediately pause to satisfy the gesture requirement
+  audioEl.muted = true;
+  const p = audioEl.play();
+  if (p && p.then) {
+    p.then(() => {
+      audioEl.pause();
+      audioEl.muted = false;
+      audioEl.currentTime = 0;
+    }).catch(() => {
+      audioEl.muted = false;
+    });
+  } else {
+    audioEl.pause();
+    audioEl.muted = false;
+    audioEl.currentTime = 0;
+  }
+}
+
+// Safe wrapper around audio.play() that handles the NotAllowedError on mobile
+function safePlay(audioEl) {
+  if (!audioEl) return;
+  const p = audioEl.play();
+  if (p && p.then) {
+    p.catch((err) => {
+      // NotAllowedError = user hasn't interacted yet; suppress silently
+      if (err.name !== 'NotAllowedError') {
+        console.warn('Playback error:', err);
+      }
+    });
+  }
+}
 
 export default function AudioPlayer() {
   const { currentSong, isPlaying, setIsPlaying, handleNext, handlePrev } = usePlayer();
   const onTogglePlay = setIsPlaying;
   const onNext = handleNext;
   const onPrev = handlePrev;
+
   const audioRef = useRef(null);
   const vocalRef = useRef(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(0.8);
   const [vocalVolume, setVocalVolume] = useState(0.9);
-  const [vocalOffset, setVocalOffset] = useState(0.0); // Default 0.0s intro alignment
-  const [vocalSpeed, setVocalSpeed] = useState(1.0);   // Tempo rate (0.85x - 1.15x)
+  const [vocalOffset, setVocalOffset] = useState(0.0);
+  const [vocalSpeed, setVocalSpeed] = useState(1.0);
   const [isMuted, setIsMuted] = useState(false);
   const [showLyricsModal, setShowLyricsModal] = useState(false);
   const [showVocalMix, setShowVocalMix] = useState(false);
 
-  // Reload & play when song changes
+  // ── Register global unlock listener once ──────────────────────────────────
+  useEffect(() => {
+    const handler = () => {
+      if (!_audioUnlocked && audioRef.current) {
+        unlockAudio(audioRef.current);
+      }
+    };
+    // touchstart is the earliest possible user gesture on mobile
+    document.addEventListener('touchstart', handler, { once: true, passive: true });
+    document.addEventListener('click', handler, { once: true });
+    return () => {
+      document.removeEventListener('touchstart', handler);
+      document.removeEventListener('click', handler);
+    };
+  }, []);
+
+  // ── Reload & play when song changes ──────────────────────────────────────
   useEffect(() => {
     if (!audioRef.current || !currentSong?.audioUrl) return;
     audioRef.current.load();
@@ -29,22 +87,26 @@ export default function AudioPlayer() {
       vocalRef.current.playbackRate = vocalSpeed;
     }
     if (isPlaying) {
-      audioRef.current.play().catch((err) => console.log('Playback error:', err));
+      // Small delay ensures load() has registered the new src before play()
+      const t = setTimeout(() => {
+        safePlay(audioRef.current);
+      }, 80);
+      return () => clearTimeout(t);
     }
   }, [currentSong]);
 
-  // Handle play/pause toggle — sync both tracks with offset
+  // ── Handle play/pause toggle — sync both tracks with offset ──────────────
   useEffect(() => {
     if (!audioRef.current) return;
     if (isPlaying) {
-      audioRef.current.play().catch((err) => console.log('Playback error:', err));
+      safePlay(audioRef.current);
       if (vocalRef.current && currentSong?.vocalUrl) {
         const cur = audioRef.current.currentTime;
         const targetVocal = Math.max(0, cur - vocalOffset);
         vocalRef.current.currentTime = targetVocal;
         vocalRef.current.playbackRate = vocalSpeed;
         if (cur >= vocalOffset) {
-          vocalRef.current.play().catch(() => {});
+          safePlay(vocalRef.current);
         }
       }
     } else {
@@ -53,7 +115,7 @@ export default function AudioPlayer() {
     }
   }, [isPlaying]);
 
-  // Keep vocal volume and speed in sync
+  // ── Keep vocal volume and speed in sync ──────────────────────────────────
   useEffect(() => {
     if (vocalRef.current) {
       vocalRef.current.volume = isMuted ? 0 : vocalVolume;
@@ -61,6 +123,7 @@ export default function AudioPlayer() {
     }
   }, [vocalVolume, vocalSpeed, isMuted]);
 
+  // ── Keep music volume in sync ─────────────────────────────────────────────
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = isMuted ? 0 : volume;
@@ -73,13 +136,13 @@ export default function AudioPlayer() {
       setCurrentTime(cur);
       setDuration(audioRef.current.duration || 0);
 
-      // Auto-correct time drift between backing track and vocals accounting for beat drop offset
+      // Auto-correct time drift between backing track and vocals
       if (vocalRef.current && currentSong?.vocalUrl) {
         if (cur < vocalOffset) {
           if (!vocalRef.current.paused) vocalRef.current.pause();
         } else {
           if (isPlaying && vocalRef.current.paused) {
-            vocalRef.current.play().catch(() => {});
+            safePlay(vocalRef.current);
           }
           const targetTime = cur - vocalOffset;
           if (Math.abs(vocalRef.current.currentTime - targetTime) > 0.12) {
@@ -100,6 +163,18 @@ export default function AudioPlayer() {
     }
   };
 
+  // ── Play / Pause button — directly triggers user gesture chain ────────────
+  const handlePlayPause = useCallback(() => {
+    // On mobile the button tap IS the user gesture — unlock here too
+    if (!_audioUnlocked && audioRef.current) {
+      unlockAudio(audioRef.current);
+      // Re-call after short delay to let unlock settle
+      setTimeout(() => onTogglePlay(!isPlaying), 120);
+      return;
+    }
+    onTogglePlay(!isPlaying);
+  }, [isPlaying, onTogglePlay]);
+
   const formatTime = (secs) => {
     if (!secs || isNaN(secs)) return '0:00';
     const m = Math.floor(secs / 60);
@@ -111,10 +186,12 @@ export default function AudioPlayer() {
 
   return (
     <div className="player-bar glass-panel">
-      {/* Music track */}
+      {/* Music track — playsInline is critical for iOS inline playback */}
       <audio
         ref={audioRef}
         src={currentSong?.audioUrl || undefined}
+        playsInline
+        preload="auto"
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleTimeUpdate}
         onEnded={() => {
@@ -126,6 +203,8 @@ export default function AudioPlayer() {
         <audio
           ref={vocalRef}
           src={currentSong.vocalUrl}
+          playsInline
+          preload="auto"
         />
       )}
 
@@ -153,7 +232,7 @@ export default function AudioPlayer() {
           </button>
           <button
             className="play-pause-btn"
-            onClick={() => onTogglePlay(!isPlaying)}
+            onClick={handlePlayPause}
             title={isPlaying ? 'Pause' : 'Play'}
           >
             {isPlaying ? '⏸' : '▶'}
@@ -313,6 +392,7 @@ export default function AudioPlayer() {
           justify-content: center;
           font-size: 24px;
           box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+          flex-shrink: 0;
         }
 
         .song-details {
@@ -355,6 +435,9 @@ export default function AudioPlayer() {
           font-size: 18px;
           color: var(--text-secondary);
           transition: transform 0.15s ease, color 0.15s ease;
+          /* Larger tap target for mobile */
+          padding: 8px;
+          margin: -8px;
         }
 
         .control-btn:hover {
@@ -374,6 +457,9 @@ export default function AudioPlayer() {
           font-size: 16px;
           box-shadow: 0 0 16px var(--accent-purple-glow);
           transition: transform 0.2s ease;
+          /* Larger tap target for mobile */
+          padding: 10px;
+          box-sizing: content-box;
         }
 
         .play-pause-btn:hover {
@@ -486,6 +572,8 @@ export default function AudioPlayer() {
 
         .volume-btn {
           font-size: 16px;
+          padding: 6px;
+          margin: -6px;
         }
 
         .volume-slider {
@@ -534,6 +622,60 @@ export default function AudioPlayer() {
           white-space: pre-wrap;
           overflow-y: auto;
           max-height: 380px;
+        }
+
+        /* ── Mobile player layout ─────────────────────────────────── */
+        @media (max-width: 768px) {
+          .player-bar {
+            left: 0;
+            bottom: var(--mobile-nav-height, 64px);
+            padding: 0 14px;
+            height: 72px;
+            gap: 10px;
+          }
+
+          .song-info {
+            width: auto;
+            flex: 1;
+            min-width: 0;
+          }
+
+          .song-artwork {
+            width: 40px;
+            height: 40px;
+            font-size: 18px;
+          }
+
+          .song-title {
+            font-size: 13px;
+          }
+
+          .player-center {
+            flex: none;
+          }
+
+          .timeline-container {
+            display: none;
+          }
+
+          .player-right {
+            width: auto;
+            gap: 10px;
+          }
+
+          .action-btn {
+            display: none;
+          }
+
+          .volume-slider {
+            display: none;
+          }
+
+          .lyrics-popover {
+            right: 14px;
+            left: 14px;
+            width: auto;
+          }
         }
       `}</style>
     </div>
