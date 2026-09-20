@@ -38,7 +38,8 @@ function MobileBottomNav() {
           bottom: 0;
           left: 0;
           right: 0;
-          height: var(--mobile-nav-height);
+          height: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom, 0px));
+          padding-bottom: env(safe-area-inset-bottom, 0px);
           z-index: 110;
           border-top: 1px solid var(--border-color);
           border-bottom: none;
@@ -47,6 +48,7 @@ function MobileBottomNav() {
           border-radius: 0;
           flex-direction: row;
           align-items: stretch;
+          box-sizing: border-box;
         }
 
         .mobile-nav-item {

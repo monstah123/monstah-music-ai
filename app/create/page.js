@@ -386,7 +386,6 @@ export default function CreatePage() {
 
         @media (max-width: 768px) {
           .create-page {
-            padding: 14px 12px !important;
             gap: 14px;
             width: 100%;
             max-width: 100%;

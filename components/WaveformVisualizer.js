@@ -72,9 +72,9 @@ export default function WaveformVisualizer({ isPlaying = false, audioRef = null,
   return (
     <canvas
       ref={canvasRef}
-      width={320}
+      width={280}
       height={height}
-      style={{ width: '100%', height: `${height}px`, display: 'block' }}
+      style={{ width: '100%', maxWidth: '100%', height: `${height}px`, display: 'block' }}
     />
   );
 }

@@ -628,10 +628,12 @@ export default function AudioPlayer() {
         @media (max-width: 768px) {
           .player-bar {
             left: 0;
-            bottom: var(--mobile-nav-height, 64px);
+            right: 0;
+            bottom: calc(var(--mobile-nav-height, 64px) + env(safe-area-inset-bottom, 0px));
+            height: var(--mobile-player-height, 72px);
             padding: 0 14px;
-            height: 72px;
-            gap: 10px;
+            z-index: 100;
+            box-sizing: border-box;
           }
 
           .song-info {
@@ -672,9 +674,13 @@ export default function AudioPlayer() {
           }
 
           .lyrics-popover {
-            right: 14px;
-            left: 14px;
+            position: fixed;
+            left: 12px;
+            right: 12px;
+            bottom: calc(var(--mobile-nav-height, 64px) + var(--mobile-player-height, 72px) + 16px + env(safe-area-inset-bottom, 0px));
             width: auto;
+            max-height: 55vh;
+            z-index: 150;
           }
         }
       `}</style>

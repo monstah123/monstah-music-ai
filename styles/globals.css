@@ -275,11 +275,18 @@ img { max-width: 100%; }
     display: none !important;
   }
 
-  /* Tighten page padding on mobile */
+  /* Mobile Page Container — CRITICAL: padding-bottom MUST be 180px + iOS safe area so bottom player + nav bar NEVER overlap content */
   .home-page,
   .create-page,
   .library-page {
-    padding: 20px 16px !important;
+    padding-top: 16px !important;
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+    padding-bottom: calc(var(--mobile-player-height) + var(--mobile-nav-height) + 50px + env(safe-area-inset-bottom, 0px)) !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
   }
 
   /* Hero banner compact on mobile */
