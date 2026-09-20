@@ -93,7 +93,23 @@ export default function Sidebar() {
           align-items: center;
           justify-content: center;
           font-size: 22px;
-          box-shadow: 0 0 20px var(--accent-purple-glow);
+          animation: shadowSweep 3.5s ease-in-out infinite;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .logo-icon::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(
+            120deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.45) 50%,
+            transparent 100%
+          );
+          animation: lightBeamSweep 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+          pointer-events: none;
         }
 
         .logo-text {
