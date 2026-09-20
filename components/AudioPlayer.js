@@ -79,42 +79,36 @@ export default function AudioPlayer() {
     };
   }, []);
 
-  // ── Reload & play when song changes ──────────────────────────────────────
+  // ── Unified Audio Playback Sync ─────────────────────────────────────────
   useEffect(() => {
-    if (!audioRef.current || !currentSong?.audioUrl) return;
-    audioRef.current.load();
-    if (vocalRef.current && currentSong?.vocalUrl) {
-      vocalRef.current.load();
-      vocalRef.current.playbackRate = vocalSpeed;
-    }
-    if (isPlaying) {
-      // Small delay ensures load() has registered the new src before play()
-      const t = setTimeout(() => {
-        safePlay(audioRef.current);
-      }, 80);
-      return () => clearTimeout(t);
-    }
-  }, [currentSong]);
+    const audio = audioRef.current;
+    if (!audio || !currentSong?.audioUrl) return;
 
-  // ── Handle play/pause toggle — sync both tracks with offset ──────────────
-  useEffect(() => {
-    if (!audioRef.current) return;
     if (isPlaying) {
-      safePlay(audioRef.current);
+      const p = audio.play();
+      if (p && p.then) {
+        p.catch((err) => {
+          if (err.name !== 'NotAllowedError' && err.name !== 'AbortError') {
+            console.warn('Playback error:', err);
+          }
+        });
+      }
+
       if (vocalRef.current && currentSong?.vocalUrl) {
-        const cur = audioRef.current.currentTime;
+        const cur = audio.currentTime || 0;
         const targetVocal = Math.max(0, cur - vocalOffset);
         vocalRef.current.currentTime = targetVocal;
         vocalRef.current.playbackRate = vocalSpeed;
         if (cur >= vocalOffset) {
-          safePlay(vocalRef.current);
+          const vp = vocalRef.current.play();
+          if (vp && vp.then) vp.catch(() => {});
         }
       }
     } else {
-      audioRef.current.pause();
+      audio.pause();
       if (vocalRef.current) vocalRef.current.pause();
     }
-  }, [isPlaying]);
+  }, [currentSong?.id, currentSong?.audioUrl, isPlaying]);
 
   // ── Keep vocal volume and speed in sync ──────────────────────────────────
   useEffect(() => {

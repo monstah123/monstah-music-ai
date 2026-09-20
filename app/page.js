@@ -17,8 +17,15 @@ export default function Home() {
 
   const scrollRow = (ref, dir) => {
     if (ref.current) {
-      const amount = dir === 'left' ? -340 : 340;
+      const amount = dir === 'left' ? -380 : 380;
       ref.current.scrollBy({ left: amount, behavior: 'smooth' });
+    }
+  };
+
+  // Convert mouse wheel vertical scroll to horizontal row scroll
+  const handleWheelScroll = (e) => {
+    if (e.deltaY !== 0 && e.currentTarget) {
+      e.currentTarget.scrollLeft += e.deltaY;
     }
   };
 
@@ -96,7 +103,11 @@ export default function Home() {
             </div>
           </div>
           <div className="horizontal-scroll-wrapper">
-            <div className="songs-scroll-row" ref={recentRowRef}>
+            <div
+              className="songs-scroll-row"
+              ref={recentRowRef}
+              onWheel={handleWheelScroll}
+            >
               {userSongs.map((song) => (
                 <div key={song.id} className="scroll-card-item">
                   <SongCard
@@ -157,7 +168,11 @@ export default function Home() {
 
         {/* Songs Horizontal Carousel */}
         <div className="horizontal-scroll-wrapper">
-          <div className="songs-scroll-row" ref={trendingRowRef}>
+          <div
+            className="songs-scroll-row"
+            ref={trendingRowRef}
+            onWheel={handleWheelScroll}
+          >
             {filteredTrending.map((song) => (
               <div key={song.id} className="scroll-card-item">
                 <SongCard
@@ -404,30 +419,38 @@ export default function Home() {
         .songs-scroll-row {
           display: flex;
           gap: 20px;
-          overflow-x: auto;
+          overflow-x: scroll !important;
+          overflow-y: hidden;
           scroll-behavior: smooth;
-          padding-bottom: 14px;
-          padding-top: 4px;
-          scrollbar-width: thin;
-          scrollbar-color: rgba(124, 58, 237, 0.4) rgba(255, 255, 255, 0.05);
+          padding-bottom: 16px;
+          padding-top: 6px;
+          width: 100%;
+          max-width: 100%;
+          box-sizing: border-box;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: auto !important;
+          scrollbar-color: rgba(124, 58, 237, 0.7) rgba(255, 255, 255, 0.08) !important;
         }
 
         .songs-scroll-row::-webkit-scrollbar {
-          height: 6px;
+          height: 10px !important;
+          display: block !important;
         }
 
         .songs-scroll-row::-webkit-scrollbar-track {
-          background: rgba(255, 255, 255, 0.04);
+          background: rgba(255, 255, 255, 0.06) !important;
           border-radius: var(--radius-full);
+          margin: 0 4px;
         }
 
         .songs-scroll-row::-webkit-scrollbar-thumb {
-          background: rgba(124, 58, 237, 0.5);
+          background: var(--accent-purple) !important;
           border-radius: var(--radius-full);
+          border: 2px solid rgba(18, 18, 28, 0.8);
         }
 
         .songs-scroll-row::-webkit-scrollbar-thumb:hover {
-          background: var(--accent-pink);
+          background: var(--accent-pink) !important;
         }
 
         .scroll-card-item {
