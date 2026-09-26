@@ -79,7 +79,30 @@ export default function AudioPlayer() {
     };
   }, []);
 
-  // ── Unified Audio Playback Sync ─────────────────────────────────────────
+  // ── Song Change: load new source and auto-play ───────────────────────────
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !currentSong?.audioUrl) return;
+
+    // Explicitly set and load the new source so the browser fetches it.
+    // Without load(), the element may still have the previous track buffered
+    // and play() will either replay the old track or throw an AbortError.
+    audio.src = currentSong.audioUrl;
+    audio.load();
+
+    if (isPlaying) {
+      const p = audio.play();
+      if (p && p.then) {
+        p.catch((err) => {
+          if (err.name !== 'NotAllowedError' && err.name !== 'AbortError') {
+            console.warn('Playback error:', err);
+          }
+        });
+      }
+    }
+  }, [currentSong?.id, currentSong?.audioUrl]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Play / Pause toggle (same song) ─────────────────────────────────────
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio || !currentSong?.audioUrl) return;
@@ -108,7 +131,7 @@ export default function AudioPlayer() {
       audio.pause();
       if (vocalRef.current) vocalRef.current.pause();
     }
-  }, [currentSong?.id, currentSong?.audioUrl, isPlaying]);
+  }, [isPlaying]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Keep vocal volume and speed in sync ──────────────────────────────────
   useEffect(() => {

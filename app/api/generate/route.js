@@ -63,6 +63,9 @@ export async function POST(request) {
       'R&B':        '/demo-audio/rnb.mp3',
       'Metal':      '/demo-audio/metal.mp3',
       'Ambient':    '/demo-audio/ambient.mp3',
+      'Reggae':     '/demo-audio/reggae.mp3',
+      'Soca':       '/demo-audio/soca.mp3',
+      'Bouyon':     '/demo-audio/bouyon.mp3',
     };
 
     const demoAudioUrl = genreAudioMap[genre] || '/demo-audio/synthwave.mp3';
